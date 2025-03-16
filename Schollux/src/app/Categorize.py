@@ -1,22 +1,19 @@
-from google import genai
+import google.generativeai as genai
 import os
 from dotenv import load_dotenv
 load_dotenv()
 
+api_key = os.getenv('API_KEY')
 
-api_key= os.getenv('API_KEY')
-
-# Replace with your API key
 if not api_key:
-    print("bad")
+    raise ValueError("API_KEY not found in environment variables")
 
+# Configure the Gemini client
+genai.configure(api_key=api_key)
+model = genai.GenerativeModel('gemini-2.0-flash')
 
-
-# Create a Gemini client
-client = genai.Client(api_key=api_key)
 def categorize(input):
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=f"Reply with either topic or specific. Categorize the following as either a topic or a specific academic paper: {input}",
+    response = model.generate_content(
+        f"Reply with either topic or specific. Categorize the following as either a topic or a specific academic paper: {input}"
     )
-    return response
+    return response.text

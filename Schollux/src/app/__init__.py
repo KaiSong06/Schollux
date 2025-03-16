@@ -1,8 +1,12 @@
 import os
-
+import logging
 from flask import Flask, render_template, request, jsonify
-from .geminiWrapper import categorize
+from .Categorize import categorize
+from .search import search_papers
+from .summarize import summarize, refineQuery
 
+# Configure logging
+logging.basicConfig(level=logging.INFO)
 
 def create_app(test_config=None):
     # create and configure the app
@@ -36,14 +40,22 @@ def create_app(test_config=None):
 
     @app.route('/chat', methods=['POST'])
     def chat():
-        data = request.json
-        user_message = data.get('message', '')
-        
-        # Get response from Gemini
         try:
-            response = categorize(user_message)
+            data = request.json
+            if not data or 'message' not in data:
+                return jsonify({'response': 'No message provided'}), 400
+                
+            user_message = data['message']
+            logging.info(f"Received message: {user_message}")
+            
+            response = summarize(user_message)
+            logging.info(f"Generated response: {response}")
+            
             return jsonify({'response': str(response)})
+            
         except Exception as e:
-            return jsonify({'response': f"Error: {str(e)}"}), 500
+            error_msg = f"Error processing request: {str(e)}"
+            logging.error(error_msg)
+            return jsonify({'response': error_msg}), 500
 
     return app
