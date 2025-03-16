@@ -11,4 +11,11 @@ def search(category, query):
             if title != "No title available" and authors != "No authors listed":
                 res.append([title, authors])
                 counter += 1
+    elif category == "specific":
+        while counter < 1:
+            title = next(search_results).get("bib", {}).get("title", "No title available")
+            authors = next(search_results).get("bib", {}).get("author", "No authors listed")
+            if title != "No title available" and authors != "No authors listed":
+                res.append([title, authors])
+                counter += 1
     return res
