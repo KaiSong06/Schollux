@@ -1,17 +1,21 @@
-from google import genai
+import google.generativeai as genai
+import os
+from dotenv import load_dotenv
 
+load_dotenv()
 
-# Replace with your API key
-api_key = 'AIzaSyBQGN0XhFcm_-T_IArl37j7E5pHH3nt8V0'
+# Get API key from environment variable
+api_key = os.getenv('GEMINI_API_KEY')
 
 # Create a Gemini client
-client = genai.Client(api_key=api_key)
-def categorize(input):
-    response = client.models.generate_content(
-        model="gemini-2.0-flash",
-        contents=f"Reply with either topic or specific. Categorize the following as eitehr a topic or a specific academic paper: {input}",
-    )
-    return response
+genai.configure(api_key=api_key)
+model = genai.GenerativeModel('gemini-pro')
 
-input = "Nutrient requirements of beef cattle"
-
+def categorize(input_text):
+    try:
+        response = model.generate_content(
+            f"Reply with either topic or specific. Categorize the following as either a topic or a specific academic paper: {input_text}"
+        )
+        return response.text
+    except Exception as e:
+        return f"Error processing request: {str(e)}"

@@ -1,6 +1,7 @@
 import os
 
-from flask import Flask
+from flask import Flask, render_template, request, jsonify
+from .geminiWrapper import categorize
 
 
 def create_app(test_config=None):
@@ -28,5 +29,21 @@ def create_app(test_config=None):
     @app.route('/hello')
     def hello():
         return 'Hello, World!'
+
+    @app.route('/')
+    def home():
+        return render_template('chat.html')
+
+    @app.route('/chat', methods=['POST'])
+    def chat():
+        data = request.json
+        user_message = data.get('message', '')
+        
+        # Get response from Gemini
+        try:
+            response = categorize(user_message)
+            return jsonify({'response': str(response)})
+        except Exception as e:
+            return jsonify({'response': f"Error: {str(e)}"}), 500
 
     return app
